@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class InitiatePaymentRequestDto {
-    private long orderId;
-    private long amount;
+    private Long orderId;
+    private Long amount;
 }

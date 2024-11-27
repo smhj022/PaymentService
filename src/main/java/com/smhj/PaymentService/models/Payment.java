@@ -1,8 +1,6 @@
 package com.smhj.PaymentService.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,5 +12,9 @@ public class Payment extends BaseModel {
 
     @Column(name = "razorpay_refund_id", unique = true, nullable = false)
     private String razorpayPaymentId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status paymentStatus;
 
 }

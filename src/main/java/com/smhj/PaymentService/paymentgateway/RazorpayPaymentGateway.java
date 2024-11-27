@@ -1,12 +1,18 @@
 package com.smhj.PaymentService.paymentgateway;
 
+import com.razorpay.Order;
 import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import org.antlr.v4.runtime.atn.SemanticContext;
 import org.json.JSONObject;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+
+import java.sql.SQLOutput;
 import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
 
 
 @Component
@@ -57,6 +63,12 @@ public class RazorpayPaymentGateway implements PaymentGateway{
 
         PaymentLink payment = razorpayClient.paymentLink.create(paymentLinkRequest);
 
+
         return payment.get("short_url");
+    }
+
+    @Override
+    public List<Order> getOrders() throws RazorpayException {
+        return razorpayClient.orders.fetchAll();
     }
 }

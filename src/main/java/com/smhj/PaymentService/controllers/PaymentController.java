@@ -1,10 +1,16 @@
 package com.smhj.PaymentService.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.razorpay.RazorpayException;
 import com.smhj.PaymentService.dtos.InitiatePaymentRequestDto;
+import com.smhj.PaymentService.dtos.OrderDto;
 import com.smhj.PaymentService.services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/payments")
@@ -23,6 +29,11 @@ public class PaymentController {
         } catch (Exception e){
             return e.toString();
         }
+    }
+
+    @GetMapping("/ordersList")
+    public ResponseEntity<List<OrderDto>> getOrdersDetails() throws RazorpayException, JsonProcessingException {
+        return new ResponseEntity<>(paymentService.getAllOrders(), HttpStatus.OK);
 
     }
 

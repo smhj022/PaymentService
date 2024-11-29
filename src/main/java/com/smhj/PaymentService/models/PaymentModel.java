@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "payments")
-public class Payment extends BaseModel {
+public class PaymentModel extends BaseModel {
 
     @Column(name = "razorpay_refund_id", unique = true, nullable = false)
     private String razorpayPaymentId;

@@ -20,6 +20,9 @@ public class BaseModel {
     @Column(name = "order_id", nullable = false, unique = true)
     private String orderId;
 
+    @Column(name = "user_id", nullable = false, unique = true)
+    private Long userId;
+
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal amount;
 
@@ -36,4 +39,15 @@ public class BaseModel {
     @Column(columnDefinition = "TEXT")
     private String metadata;
 
+    // Automatically set `createdAt` before persisting
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Automatically set `updatedAt` before updating
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

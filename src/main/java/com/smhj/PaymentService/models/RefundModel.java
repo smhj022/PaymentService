@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "refunds")
-public class Refund extends BaseModel{
+public class RefundModel extends BaseModel{
 
     @Column(name = "razorpay_refund_id", unique = true)
     private String razorpayRefundId;
@@ -20,7 +20,7 @@ public class Refund extends BaseModel{
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "payment_id", nullable = false)
-    private Payment payment;
+    private PaymentModel payment;
 
 
 }

@@ -25,7 +25,7 @@ public class PaymentController {
     @PostMapping("/")
     public String initiatePayment(@RequestBody InitiatePaymentRequestDto requestDto) throws RazorpayException {
         try {
-            return paymentService.initiatePayment(requestDto.getOrderId(), requestDto.getAmount());
+            return paymentService.initiatePayment(requestDto.getOrderId(), requestDto.getAmount(), requestDto.getCurrency());
         } catch (Exception e){
             return e.toString();
         }
@@ -34,7 +34,11 @@ public class PaymentController {
     @GetMapping("/ordersList")
     public ResponseEntity<List<OrderDto>> getOrdersDetails() throws RazorpayException, JsonProcessingException {
         return new ResponseEntity<>(paymentService.getAllOrders(), HttpStatus.OK);
+    }
 
+    @GetMapping("/order")
+    public ResponseEntity<OrderDto> getOrderByOrderId(@RequestBody String orderId) throws JsonProcessingException, RazorpayException {
+        return new ResponseEntity<>(paymentService.getOrderByOrderId(orderId), HttpStatus.OK);
     }
 
     @GetMapping("/sampleAPI")

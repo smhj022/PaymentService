@@ -1,7 +1,9 @@
 package com.smhj.PaymentService.repositories;
 
-import com.smhj.PaymentService.models.Refund;
+import com.smhj.PaymentService.models.RefundModel;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface RefundRepository extends JpaRepository<Refund, Long> {
+@Repository
+public interface RefundRepository extends JpaRepository<RefundModel, Long> {
 }

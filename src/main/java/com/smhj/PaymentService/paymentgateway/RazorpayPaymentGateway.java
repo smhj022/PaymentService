@@ -77,4 +77,22 @@ public class RazorpayPaymentGateway implements PaymentGateway{
     public Order getOrderById(String orderId) throws RazorpayException {
         return razorpayClient.orders.fetch(orderId);
     }
+
+
+    /**
+     *
+     * @param receipt -> unique identifier of the order
+     * @param amount -> Total amount of order
+     * @param currency -> current of amount
+     * @return Order object
+     * @throws RazorpayException if unable to create the object
+     */
+    @Override
+    public Order createOrder(String receipt, BigDecimal amount, String currency) throws RazorpayException {
+        JSONObject orderRequest = new JSONObject();
+        orderRequest.put("currency", "INR");
+        orderRequest.put("receipt", receipt);
+        orderRequest.put("amount", amount.multiply(BigDecimal.valueOf(100)));
+        return razorpayClient.orders.create(orderRequest);
+    }
 }

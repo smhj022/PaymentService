@@ -1,6 +1,6 @@
 package com.smhj.PaymentService.models;
 
-public enum Status {
+public enum PaymentStatus {
     CREATED,
     PAID,
     FAILED,

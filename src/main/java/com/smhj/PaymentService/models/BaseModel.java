@@ -17,19 +17,6 @@ public class BaseModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false, unique = true)
-    private String orderId;
-
-    @Column(name = "user_id", nullable = false, unique = true)
-    private Long userId;
-
-    @Column(nullable = false, precision = 19, scale = 4)
-    private BigDecimal amount;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Currency currency;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

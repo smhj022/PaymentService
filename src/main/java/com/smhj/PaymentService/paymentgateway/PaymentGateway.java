@@ -14,4 +14,6 @@ public interface PaymentGateway {
     List<Order> getOrders() throws RazorpayException;
 
     Order getOrderById(String orderId) throws RazorpayException;
+
+    Order createOrder(String receipt, BigDecimal amount, String currency) throws RazorpayException;
 }

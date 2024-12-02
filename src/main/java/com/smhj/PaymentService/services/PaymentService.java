@@ -4,10 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.razorpay.Order;
 import com.razorpay.RazorpayException;
 import com.smhj.PaymentService.dtos.OrderDto;
-import com.smhj.PaymentService.models.Currency;
-import com.smhj.PaymentService.models.PaymentModel;
-import com.smhj.PaymentService.models.Status;
+import com.smhj.PaymentService.models.*;
 import com.smhj.PaymentService.paymentgateway.PaymentGateway;
+import com.smhj.PaymentService.repositories.OrderRepository;
 import com.smhj.PaymentService.repositories.PaymentRepository;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -22,27 +21,36 @@ public class PaymentService {
 
     private final PaymentGateway paymentGateway;
     private final PaymentRepository paymentRepository;
+    private final OrderRepository orderRepository;
 
-    public PaymentService(PaymentGateway paymentGateway, PaymentRepository paymentRepository){
+    public PaymentService(PaymentGateway paymentGateway, PaymentRepository paymentRepository,
+                          OrderRepository orderRepository, OrderRepository orderRepository1){
         this.paymentGateway = paymentGateway;
         this.paymentRepository = paymentRepository;
+        this.orderRepository = orderRepository;
     }
 
     /**
-     * Method to generate payment link and save the payment details for the order
+     * Method to create the order and generate a payment link;
      */
-    public String initiatePayment(String orderId, BigDecimal amount, String currency) throws RazorpayException {
-        // Generate Razorpay payment object
-        JSONObject razorpayPaymentObj = paymentGateway.generatePaymentObject(orderId, amount, currency).toJson();
+    public String createOrder(BigDecimal amount, String currency, Long userId) throws RazorpayException {
+        String receipt = "rcpt_" + userId + "_" + System.currentTimeMillis();
+        Order razorpayOrder = paymentGateway.createOrder(receipt, amount, currency);
+        OrderEntity order = razorpayOrderToOrderDto(razorpayOrder.toJson(), userId, receipt);
+        orderRepository.save(order);
+        return order.getOrderId();
+    }
 
-        // Map Razorpay response to PaymentModel and save to data base
-        PaymentModel paymentModel = createPaymentModel(orderId, amount, razorpayPaymentObj);
-
-        // Save payment details to the repository
-        paymentRepository.save(paymentModel);
-
-        // Return the short payment URL
-        return razorpayPaymentObj.getString("short_url");
+    public OrderEntity razorpayOrderToOrderDto(JSONObject razorpayOrderObj, Long userId, String receipt){
+        OrderEntity order = new OrderEntity();
+        order.setAmount(razorpayOrderObj.getBigDecimal("amount"));
+        order.setOrderStatus(parseOrderStatus(razorpayOrderObj.getString("status")));
+        order.setCurrency(parseCurrency("INR"));
+        order.setOrderId(razorpayOrderObj.getString("id"));
+        order.setReceipt(receipt);
+        order.setMetadata(razorpayOrderObj.toString());
+        order.setUserId(userId);
+        return order;
     }
 
     /**
@@ -63,43 +71,34 @@ public class PaymentService {
     }
 
     public OrderDto rozorpayOrderToOrderDto(Order razorpayOrder) throws JsonProcessingException {
-
         OrderDto orderDto = new OrderDto();
         JSONObject jsonObject = razorpayOrder.toJson();
-
         orderDto.setId(jsonObject.getString("id"));
         orderDto.setOrderStatus(jsonObject.getString("status"));
         orderDto.setAmount(jsonObject.getLong("amount"));
         orderDto.setCurrency(jsonObject.getString("currency"));
         orderDto.setReceipt(jsonObject.getString("receipt"));
-
         return orderDto;
-    }
-
-    /**
-     * Build a PaymentModel instance from Razorpay response and input details.
-     */
-    private PaymentModel createPaymentModel(String orderId, BigDecimal amount, JSONObject razorpayPaymentObj) {
-        PaymentModel paymentModel = new PaymentModel();
-
-        paymentModel.setPaymentStatus(parseStatus(razorpayPaymentObj.getString("status")));
-        paymentModel.setCurrency(parseCurrency("INR"));
-
-        paymentModel.setRazorpayPaymentId(razorpayPaymentObj.getString("id"));
-        paymentModel.setAmount(amount);
-        paymentModel.setOrderId(orderId);
-        paymentModel.setMetadata(razorpayPaymentObj.toString());
-        paymentModel.setUserId(1L);
-
-        return paymentModel;
     }
 
     /**
      * Parse the status string into the Status enum.
      */
-    private Status parseStatus(String status) {
+    private PaymentStatus parseStatus(String status) {
         try {
-            return Status.valueOf(status.toUpperCase());
+            return PaymentStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid status received: " + status, e);
+        }
+    }
+
+
+    /**
+     * Parse the status string into the Status enum.
+     */
+    private OrderStatus parseOrderStatus(String status) {
+        try {
+            return OrderStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid status received: " + status, e);
         }

@@ -22,8 +22,8 @@ public class PaymentEntity extends BaseModel {
     @Column(nullable = false)
     private String paymentLink;
 
-    @Column(nullable = false)
-    private Instant expiryTime;
+//    @Column(nullable = false)
+//    private String expiryTime;
 
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false, unique = true) // Unique to ensure one-to-one

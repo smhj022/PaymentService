@@ -3,7 +3,6 @@ package com.smhj.PaymentService.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.razorpay.RazorpayException;
 import com.smhj.PaymentService.dtos.CreateOrderDto;
-import com.smhj.PaymentService.dtos.InitiatePaymentRequestDto;
 import com.smhj.PaymentService.dtos.OrderDto;
 import com.smhj.PaymentService.services.PaymentService;
 import org.springframework.http.HttpStatus;
@@ -22,19 +21,15 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-//    @PostMapping("/")
-//    public String initiatePayment(@RequestBody InitiatePaymentRequestDto requestDto) throws RazorpayException {
-//        try {
-//            return paymentService.initiatePayment(requestDto.getOrderId(), requestDto.getAmount(), requestDto.getCurrency());
-//        } catch (Exception e){
-//            return e.toString();
-//        }
-//    }
-
     @PostMapping("/create-order")
     public ResponseEntity<String> createOrder(@RequestBody CreateOrderDto requestDto) throws RazorpayException {
         return new ResponseEntity<>(paymentService.createOrder(requestDto.getAmount(),
                 requestDto.getCurrency(), requestDto.getUserId()), HttpStatus.OK);
+    }
+
+    @GetMapping("/checkout/{orderId}")
+    public ResponseEntity<String> checkoutOrder(@PathVariable("orderId") String orderId) throws RazorpayException {
+        return new ResponseEntity<>(paymentService.checkoutOrder(orderId), HttpStatus.OK);
     }
 
 
@@ -48,7 +43,7 @@ public class PaymentController {
         return new ResponseEntity<>(paymentService.getOrderByOrderId(orderId), HttpStatus.OK);
     }
 
-    @GetMapping("/sampleAPI")
+    @PostMapping("/sampleAPI")
     public String sampleAPI() {
         return "Hello from payment Service";
     }

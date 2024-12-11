@@ -4,6 +4,7 @@ import com.razorpay.Order;
 import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import com.smhj.PaymentService.models.OrderEntity;
 import org.json.JSONObject;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class RazorpayPaymentGateway implements PaymentGateway{
     }
 
     @Override
-    public PaymentLink generatePaymentObject(String orderId, BigDecimal amount, String currency) throws RazorpayException {
+    public PaymentLink generatePaymentObject(OrderEntity order) throws RazorpayException {
 
         Instant now = Instant.now();
 
@@ -36,13 +37,14 @@ public class RazorpayPaymentGateway implements PaymentGateway{
         long epochTime = futureTime.getEpochSecond();
         
         JSONObject paymentLinkRequest = new JSONObject();
-        paymentLinkRequest.put("amount", amount.multiply(BigDecimal.valueOf(100)));
+        paymentLinkRequest.put("amount", order.getAmount());
         paymentLinkRequest.put("currency","INR");
-//        paymentLinkRequest.put("accept_partial",true);
-//        paymentLinkRequest.put("first_min_partial_amount",100);
+
+        paymentLinkRequest.put("reference_id" , order.getOrderId());
+
         paymentLinkRequest.put("expire_by", futureTime.getEpochSecond());
-        paymentLinkRequest.put("reference_id", orderId.toString());
-        paymentLinkRequest.put("description","Payment for order_id" + orderId);
+
+        paymentLinkRequest.put("description","Payment for order_id" + order.getOrderId());
 
 
         // customer details

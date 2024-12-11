@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class OrderEntity extends BaseModel{
 
     @Column(nullable = false, unique = true)
-    String OrderId;
+    String orderId;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;

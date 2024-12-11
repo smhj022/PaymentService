@@ -2,6 +2,7 @@ package com.smhj.PaymentService.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.razorpay.Order;
+import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayException;
 import com.smhj.PaymentService.dtos.OrderDto;
 import com.smhj.PaymentService.models.*;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -39,6 +41,38 @@ public class PaymentService {
         OrderEntity order = razorpayOrderToOrderDto(razorpayOrder.toJson(), userId, receipt);
         orderRepository.save(order);
         return order.getOrderId();
+    }
+
+    public String checkoutOrder(String orderId) throws RazorpayException {
+        // get Order from order Id
+
+        Optional<OrderEntity> order = orderRepository.findByOrderId(orderId);
+
+        if(order.isEmpty()){
+            return "Order with given Id is not found";
+        }
+
+        PaymentLink razorpayPayment = paymentGateway.generatePaymentObject(order.get());
+
+        PaymentEntity payment = razorpayPaymentToPaymentDto(razorpayPayment.toJson(), order.get());
+
+        paymentRepository.save(payment);
+
+        return payment.getPaymentLink();
+    }
+
+    private PaymentEntity razorpayPaymentToPaymentDto(JSONObject razorpayPaymentObj, OrderEntity order) {
+
+        PaymentEntity payment = new PaymentEntity();
+
+        payment.setPaymentLink(razorpayPaymentObj.getString("short_url"));
+        payment.setPaymentStatus(parsePaymentStatus(razorpayPaymentObj.getString("status")));
+        payment.setRazorpayPaymentId(razorpayPaymentObj.getString("id"));
+        //payment.setExpiryTime(razorpayPaymentObj.getString("expire_by"));
+        payment.setMetadata(razorpayPaymentObj.toString());
+        payment.setOrder(order);
+
+        return payment;
     }
 
     public OrderEntity razorpayOrderToOrderDto(JSONObject razorpayOrderObj, Long userId, String receipt){
@@ -84,7 +118,7 @@ public class PaymentService {
     /**
      * Parse the status string into the Status enum.
      */
-    private PaymentStatus parseStatus(String status) {
+    private PaymentStatus parsePaymentStatus(String status) {
         try {
             return PaymentStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
